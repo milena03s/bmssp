@@ -2,6 +2,8 @@
 #include "../helpers/external/nanobench.h"
 
 // #include "../helpers/debug.cpp"
+#include <iostream>
+#include <cstdio>
 #include "../include/bmssp.hpp"
 
 #include "../helpers/dijkstra.hpp"
@@ -57,11 +59,11 @@ for (auto const& r : results) {
         
         uint64_t total_runs = r.sum(ankerl::nanobench::Result::Measure::iterations);
 
-        printf("| %-16s | %17.0f | %7.2fx | %20lu |\n", 
-               r.config().mBenchmarkName.c_str(), 
-               time_ns, // Now this is 54000000.0, not 0.054
-               ratio, 
-               total_runs);
+        printf("| %-16s | %17.0f | %7.2fx | %20llu |\n",
+               r.config().mBenchmarkName.c_str(),
+               time_ns,
+               ratio,
+               static_cast<unsigned long long>(total_runs));
     }
     std::cout << "--------------------------------------------------------------------------------\n";
 }

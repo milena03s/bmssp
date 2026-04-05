@@ -5,6 +5,8 @@
 #include<iostream>
 #include<fstream>
 #include<sstream>
+#include<vector>
+#include<utility>
 
 template<typename distT>
 auto readGraph(std::string path) {
@@ -37,7 +39,14 @@ auto readGraph(std::string path) {
             for(auto &[j, w]: adj[i]) j--;
         }
     }
-    adj.pop_back();
+    if(adj.isempty() || adj.back().empty()){
+        adj.pop_back();
+    }
+    
+    if (n <= 0) {
+        return {{}, 0};
+    }
+    
     return std::make_pair(adj, m);
 }
 

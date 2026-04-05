@@ -15,6 +15,7 @@
 #include<algorithm>
 #include"external/floyd_rivest_select.h"
 #include"external/unordered_dense.h"
+#include <tuple>
 
 namespace spp_expected {
 
@@ -28,7 +29,7 @@ class batchPQ { // batch priority queue
         template <typename It>
         bool operator()(const std::pair<uniqueDistT, It>& a, const std::pair<uniqueDistT, It>& b) const {
             if (a.first != b.first) return a.first < b.first;
-            return  addressof(*a.second) < addressof(*b.second);
+            return  std::addressof(*a.second) < std::addressof(*b.second);
         }
     };
     
@@ -64,7 +65,7 @@ public:
     
     void insert(uniqueDistT x){ // O(lg(Block Numbers))         
         uniqueDistT b = x;
-        int a = get<2>(b);
+        int a = std::get<2>(b);
     
         // checking if exists
         auto it_exist = actual_value.find(a);
@@ -96,7 +97,7 @@ public:
     void batchPrepend(const std::vector<uniqueDistT> &v){
         std::list<elementT> l;
         for(auto x: v){
-            l.push_back({get<2>(x),x});
+            l.push_back(elementT{std::get<2>(x), x});
         }
         batchPrepend(l);
     }
@@ -153,7 +154,7 @@ public:
     
 private:
     void delete_(uniqueDistT x){    
-        int a = get<2>(x);
+        int a = std::get<2>(x);
         uniqueDistT b = actual_value[a];
         
         auto it_w = where_is1.find(a);
@@ -191,7 +192,7 @@ private:
     }
 
         
-    void split(std::list<std::list<elementT>>::iterator it_block){ // O(M) + O(lg(Block Numbers))
+    void split(typename std::list<std::list<elementT>>::iterator it_block){ // O(M) + O(lg(Block Numbers))
         int sz = (*it_block).size();
         
         std::vector<elementT> v((*it_block).begin() , (*it_block).end());
@@ -205,7 +206,7 @@ private:
     
         while(it != (*it_block).end()){ // O(M)
             if((*it).second >= med){
-                (*new_block).push_back(move(*it));
+                (*new_block).push_back(std::move(*it));
                 auto it_new = (*new_block).end(); it_new--;
                 where_is1[(*it).first] = {new_block, it_new};
     
@@ -218,12 +219,12 @@ private:
 
         // Updating UBs   
         // O(lg(Block Numbers))
-        uniqueDistT UB1 = {get<0>(med),get<1>(med),get<2>(med),get<3>(med)-1};
-        auto it_lb = UBs.lower_bound({UB1,it_min});
+        uniqueDistT UB1 = uniqueDistT{std::get<0>(med), std::get<1>(med), std::get<2>(med), std::get<3>(med) - 1};
+        auto it_lb = UBs.lower_bound(std::make_pair(UB1, it_min));
         auto [UB2,aux] = (*it_lb);
         
-        UBs.insert({UB1,it_block});
-        UBs.insert({UB2,new_block});
+        UBs.insert(std::make_pair(UB1, it_block));
+        UBs.insert(std::make_pair(UB2, new_block));
         
         UBs.erase(it_lb);
     }
@@ -263,13 +264,13 @@ private:
         std::list<elementT> less,great;
         for(auto [a,b]: l){
             if(b < med){
-                less.push_back({a,b});
+                less.push_back(elementT{a, b});
             }else if(b > med){
-                great.push_back({a,b});
+                great.push_back(elementT{a, b});
             }
         }
         
-        great.push_back({get<2>(med),med});
+        great.push_back(elementT{std::get<2>(med), med});
 
         batchPrepend(great);
         batchPrepend(less);
@@ -294,7 +295,7 @@ public:
     bmssp(int n_): n(n_) {
         ori_adj.assign(n, {});
     }
-    bmssp(const auto &adj) {
+    bmssp(const std::vector<std::vector<std::pair<int, wT>>> &adj) {
         n = adj.size();
         ori_adj = adj;
     }
@@ -422,7 +423,7 @@ public:
             int u = real_u;
             if(d[u] == oo) return {};
 
-            int path_sz = get<1>(getDist(u)) + 1;
+            int path_sz = std::get<1>(getDist(u)) + 1;
             std::vector<int> path(path_sz);
             for(int i = path_sz - 1; i >= 0; i--) {
                 path[i] = u;
@@ -433,7 +434,7 @@ public:
             int u = real_u;
             if(d[toAnyCustomNode(u)] == oo) return {};
 
-            int max_path_sz = get<1>(getDist(toAnyCustomNode(u))) + 1;
+            int max_path_sz = std::get<1>(getDist(toAnyCustomNode(u))) + 1;
             std::vector<int> path;
             path.reserve(max_path_sz);
 
@@ -562,7 +563,7 @@ private:
         heap.push(getDist(x));
         while(heap.empty() == false && complete.size() < k + 1) {
             auto du = heap.top();
-            int u = get<2>(du);
+            int u = std::get<2>(du);
             heap.pop();
 
             if(du > getDist(u)) continue;
